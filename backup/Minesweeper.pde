@@ -11,7 +11,7 @@ PImage mine, flag, numbers[];
 
 boolean gameover = false, won, rematch;
 
-boolean tobiMode = false, autoRevealMode = false, fullAssistMode = false;
+boolean tobiMode = false, autoRevealMode = false;
 
 int startTime;
 int gameoverTime;
@@ -126,7 +126,6 @@ void mousePressed() {
           generateBoard(x, y);
           reveal(x, y);
         }
-        firstClick = false;
       } else {
         if (!minefield[x][y].revealed) {
           reveal(x, y);
@@ -134,13 +133,13 @@ void mousePressed() {
           autoreveal(x, y);
         }
       }
+      firstClick = false;
     } else if (mouseButton == RIGHT) {
       if (!minefield[x][y].revealed) {
         minefield[x][y].flagged = !minefield[x][y].flagged;
+        if (autoRevealMode) autorevealAll();
       }
     }
-    
-    if (!gameover && (autoRevealMode || fullAssistMode)) autorevealAll();
   } else {
     restart(false);
   }
@@ -152,13 +151,6 @@ void keyPressed() {
   }
   if (key == 't') {
     tobiMode = !tobiMode;
-  }
-  if (key == 'f') {
-    fullAssistMode = !fullAssistMode;
-    if (fullAssistMode) {
-      println("Auto mode on!");
-      autorevealAll();
-    } else println("Auto mode off!");
   }
   if (key == ' ') {
     autorevealAll();
@@ -191,46 +183,19 @@ boolean autoreveal(int x, int y) {
   return changed;
 }
 
-boolean fullAssist(int x, int y) {
-  int n = 0;
-  for (int nx = x-1; nx <= x+1; nx++) {
-    for (int ny = y-1; ny <= y+1; ny++) {
-      if (nx >= 0 && nx < MINEFIELD_WIDTH && ny >= 0 && ny < MINEFIELD_HEIGHT) {
-        Cell nm = minefield[nx][ny];
-        if (!nm.revealed) {
-          n++;
-        }
-      }
-    }
-  }
-  if (n == minefield[x][y].mined_neighbours && n != countFlaggedNeighbours(x, y)) {
-    for (int nx = x-1; nx <= x+1; nx++) {
-      for (int ny = y-1; ny <= y+1; ny++) {
-        if (nx >= 0 && nx < MINEFIELD_WIDTH && ny >= 0 && ny < MINEFIELD_HEIGHT) {
-          if (!minefield[nx][ny].revealed) minefield[nx][ny].flagged = true;
-        }
-      }
-    }
-    return true;
-  }
-
-  return false;
-}
-
 void autorevealAll() {
-  boolean keepGoing = true;
-  while (keepGoing) {
-    keepGoing = false;
-    for (int x = 0; x < MINEFIELD_WIDTH; x++) {
-      for (int y = 0; y < MINEFIELD_HEIGHT; y++) {
-        if (minefield[x][y].revealed) {
-          if (fullAssistMode) {
-            if (fullAssist(x, y)) keepGoing = true;
-          }
-          if (autoreveal(x, y)) keepGoing = true;
-        }
+  boolean again = false;
+  for (int x = 0; x < MINEFIELD_WIDTH; x++) {
+    for (int y = 0; y < MINEFIELD_HEIGHT; y++) {
+      if (minefield[x][y].revealed) {
+
+        if (autoreveal(x, y)) again = true;
       }
     }
+  }
+  if (again) {
+    //println("Autoreveal again!");
+    autorevealAll();
   }
 }
 
@@ -246,7 +211,7 @@ boolean reveal(int x, int y) {
       if (minefield[x][y].mined_neighbours == 0) {
         for (int nx = x-1; nx <= x+1; nx++) {
           for (int ny = y-1; ny <= y+1; ny++) {
-            if (nx >= 0 && nx < MINEFIELD_WIDTH && ny >= 0 && ny < MINEFIELD_HEIGHT && (nx != x || ny != y)) reveal(nx, ny);
+            if (nx >= 0 && nx < MINEFIELD_WIDTH && ny >= 0 && ny < MINEFIELD_HEIGHT && (nx != x ||ny != y)) reveal(nx, ny);
           }
         }
       }
@@ -339,7 +304,7 @@ int countFlaggedNeighbours(int x, int y) {
   int n = 0;
   for (int nx = x-1; nx <= x+1; nx++) {
     for (int ny = y-1; ny <= y+1; ny++) {
-      if (nx >= 0 && nx < MINEFIELD_WIDTH && ny >= 0 && ny < MINEFIELD_HEIGHT && minefield[nx][ny].flagged && !minefield[nx][ny].revealed) n++;
+      if (nx >= 0 && nx < MINEFIELD_WIDTH && ny >= 0 && ny < MINEFIELD_HEIGHT && minefield[nx][ny].flagged) n++;
     }
   }
   return n;
