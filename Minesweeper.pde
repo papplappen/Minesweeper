@@ -27,6 +27,7 @@ void settings() {
 }
 
 void setup () {
+  
   mine = loadImage("pic/png/mine.png");
   flag = loadImage("pic/png/flag.png");
 
@@ -50,7 +51,7 @@ void setup () {
 void draw () {
   background(240);
 
-
+  int minesRemaining = NUM_MINES;
   // Draw field contents
   for (int x = 0; x < MINEFIELD_WIDTH; x++) {
     for (int y = 0; y < MINEFIELD_HEIGHT; y++) {
@@ -68,10 +69,12 @@ void draw () {
       } else {
         if (minefield[x][y].flagged) {
           image(flag, x*(CELL_WIDTH+1) + 1, y*(CELL_HEIGHT+1) + 1);
+          minesRemaining--;
         }
       }
     }
   }
+  surface.setTitle("Mines remaining: " + minesRemaining);
 
 
   // Draw grid
