@@ -1,6 +1,6 @@
 final int MINEFIELD_WIDTH = 16;
 final int MINEFIELD_HEIGHT = 16;
-final int NUM_MINES = 40;
+final int NUM_MINES = 50;
 final int FIXED_SEED = 0;
 
 final int CELL_WIDTH = 32;
